@@ -3,11 +3,13 @@ public class Customer {
     private int customerId;
     private String name;
     private String email;
+    private Address address;
 
     public Customer(int customerId, String name, String email) {
         this.customerId = customerId;
         this.name = name;
         this.email = email;
+        this.address = new Address("", "", "");
     }
 
     public int getCustomerId() {
@@ -22,9 +24,35 @@ public class Customer {
         return email;
     }
 
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(String street, String city, String pinCode) {
+        this.address = new Address(street, city, pinCode);
+    }
+
     public void displayCustomer() {
         System.out.println("Customer ID: " + customerId);
         System.out.println("Name: " + name);
         System.out.println("Email: " + email);
+        System.out.println("Address: " + address);
+    }
+
+    public class Address {
+        private String street;
+        private String city;
+        private String pinCode;
+
+        public Address(String street, String city, String pinCode) {
+            this.street = street;
+            this.city = city;
+            this.pinCode = pinCode;
+        }
+
+        @Override
+        public String toString() {
+            return street + ", " + city + " - " + pinCode;
+        }
     }
 }

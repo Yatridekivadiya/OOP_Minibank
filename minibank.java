@@ -33,8 +33,7 @@ public class minibank {
                     break;
 
                 case 3:
-                    System.out.println("Account Number: " + account.getAccountNumber());
-                    System.out.println("Balance: " + account.getBalance());
+                    System.out.println(account);
                     break;
 
                 case 4:
