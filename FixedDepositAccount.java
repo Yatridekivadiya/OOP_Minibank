@@ -1,0 +1,17 @@
+
+public class FixedDepositAccount extends Account {
+
+    public FixedDepositAccount(int accountNumber, double balance) {
+        super(accountNumber, balance);
+    }
+
+    @Override
+    public double interestRate() {
+        return 7.0;
+    }
+
+    @Override
+    public boolean canWithdraw(long amount) {
+        return false;
+    }
+}

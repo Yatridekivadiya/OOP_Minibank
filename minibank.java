@@ -6,55 +6,61 @@ public class minibank {
         Scanner sc = new Scanner(System.in);
 
         Customer customer = new Customer(101, "Rahul", "rahul@gmail.com");
-        Account account = new Account(1001, 5000.0);
+
+        Account[] accounts = {
+            new SavingsAccount(1001, 5000, 1000),
+            new CurrentAccount(1002, 2000, 1000),
+            new FixedDepositAccount(1003, 10000)
+        };
 
         int choice;
 
         do {
-            System.out.println("\n===== MiniBank =====");
-            System.out.println("1. Bank Information");
-            System.out.println("2. Customer Information");
-            System.out.println("3. Account Information");
-            System.out.println("4. Deposit");
-            System.out.println("5. Withdraw");
-            System.out.println("6. Exit");
-            System.out.print("Enter your choice: ");
+            System.out.println("\n--- MiniBank Menu ---");
+            System.out.println("1. Customer Details");
+            System.out.println("2. Display All Accounts");
+            System.out.println("3. Deposit");
+            System.out.println("4. Withdraw");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
 
             choice = sc.nextInt();
 
             switch (choice) {
                 case 1:
-                    System.out.println("Welcome to MiniBank!");
-                    System.out.println("Simple and Secure Banking");
+                    System.out.println(customer);
                     break;
 
                 case 2:
-                    customer.displayCustomer();
+                    for (Account account : accounts) {
+                        System.out.println(account);
+                        System.out.println("Interest Rate: "
+                                + account.interestRate() + "%");
+
+                        if (account instanceof SavingsAccount) {
+                            System.out.println("Type: Savings Account");
+                        }
+                    }
                     break;
 
                 case 3:
-                    System.out.println(account);
+                    System.out.print("Enter deposit amount: ");
+                    accounts[0].deposit(sc.nextDouble());
                     break;
 
                 case 4:
-                    System.out.print("Enter deposit amount: ");
-                    account.deposit(sc.nextDouble());
+                    System.out.print("Enter withdrawal amount: ");
+                    accounts[0].withdraw(sc.nextDouble());
                     break;
 
                 case 5:
-                    System.out.print("Enter withdrawal amount: ");
-                    account.withdraw(sc.nextDouble());
-                    break;
-
-                case 6:
-                    System.out.println("Thank you for using MiniBank!");
+                    System.out.println("Thank you!");
                     break;
 
                 default:
-                    System.out.println("Invalid choice. Try again.");
+                    System.out.println("Invalid choice.");
             }
-
-        } while (choice != 6);
+        } while (choice != 5);
 
         sc.close();
     }

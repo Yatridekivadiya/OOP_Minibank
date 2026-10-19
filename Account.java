@@ -1,9 +1,7 @@
 
-import java.util.Objects;
-
-public class Account {
-    private int accountNumber;
-    private double balance;
+public abstract class Account {
+    protected int accountNumber;
+    protected double balance;
 
     public Account(int accountNumber, double balance) {
         this.accountNumber = accountNumber;
@@ -28,38 +26,21 @@ public class Account {
     }
 
     public void withdraw(double amount) {
-        if (amount <= 0) {
-            System.out.println("Invalid withdrawal amount.");
-        } else if (amount > balance) {
-            System.out.println("Insufficient balance.");
-        } else {
+        if (canWithdraw((long) amount)) {
             balance -= amount;
             System.out.println("Withdrawal successful.");
+        } else {
+            System.out.println("Withdrawal not allowed.");
         }
     }
+
+    public abstract double interestRate();
+
+    public abstract boolean canWithdraw(long amount);
 
     @Override
     public String toString() {
         return "Account{accountNumber=" + accountNumber
                 + ", balance=" + balance + "}";
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof Account)) {
-            return false;
-        }
-
-        Account other = (Account) obj;
-        return accountNumber == other.accountNumber;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(accountNumber);
     }
 }
