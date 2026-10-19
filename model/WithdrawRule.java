@@ -1,6 +1,4 @@
 package model;
-import model.Account;
-
 
 @FunctionalInterface
 public interface WithdrawRule {

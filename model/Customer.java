@@ -1,4 +1,5 @@
 package model;
+import model.annotation.MaxLength;
 
 public class Customer {
     private int customerId;

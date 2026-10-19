@@ -14,6 +14,7 @@ import util.Validator;
 import util.CommandParser;
 import util.Command;
 import util.TransactionType;
+import util.AnnotationValidator;
 
 
 public class MiniBank {
@@ -27,6 +28,12 @@ public class MiniBank {
             new CurrentAccount(1002, 2000, 1000),
             new FixedDepositAccount(1003, 10000)
         };
+
+        Account invalidAccount = new SavingsAccount(1004, -100, 0);
+
+        for (String error : AnnotationValidator.validate(invalidAccount)) {
+            System.out.println(error);
+        }
 
         
         WithdrawRule rule1 = new WithdrawRule() {
