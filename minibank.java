@@ -15,7 +15,11 @@ import util.CommandParser;
 import util.Command;
 import util.TransactionType;
 import util.AnnotationValidator;
-
+import exception.BankException;
+import exception.InsufficientFundsException;
+import exception.AccountNotFoundException;
+import exception.InvalidAmountException;
+import exception.BankResource;
 
 public class MiniBank {
     public static void main(String[] args) {
@@ -35,7 +39,6 @@ public class MiniBank {
             System.out.println(error);
         }
 
-        
         WithdrawRule rule1 = new WithdrawRule() {
             @Override
             public boolean allow(Account account, long amount) {
@@ -52,7 +55,6 @@ public class MiniBank {
         System.out.println("Lambda result: "
                 + rule2.allow(accounts[0], 500));
 
-
         int choice;
 
         do {
@@ -61,48 +63,81 @@ public class MiniBank {
             System.out.println("2. Display All Accounts");
             System.out.println("3. Deposit");
             System.out.println("4. Withdraw");
-            System.out.println("5. Exit");
+            System.out.println("5. Transfer");
+            System.out.println("6. Exit");
             System.out.print("Enter choice: ");
 
             choice = sc.nextInt();
 
-            switch (choice) {
-                case 1:
-                    System.out.println(customer);
-                    break;
+            try {
+                switch (choice) {
+                    case 1:
+                        System.out.println(customer);
+                        break;
 
-                case 2:
-                    for (Account account : accounts) {
-                        System.out.println(account);
-                        System.out.println("Interest Rate: "
-                                + account.interestRate() + "%");
-                        System.out.println("Yearly Interest: "
-                                + account.yearlyInterest());
+                    case 2:
+                        for (Account account : accounts) {
+                            System.out.println(account);
+                            System.out.println("Interest Rate: "
+                                    + account.interestRate() + "%");
+                            System.out.println("Yearly Interest: "
+                                    + account.yearlyInterest());
 
-                        if (account instanceof SavingsAccount) {
-                            System.out.println("Type: Savings Account");
+                            if (account instanceof SavingsAccount) {
+                                System.out.println("Type: Savings Account");
+                            }
                         }
-                    }
-                    break;
+                        break;
 
-                case 3:
-                    System.out.print("Enter deposit amount: ");
-                    accounts[0].deposit(sc.nextLong());
-                    break;
+                    case 3:
+                        System.out.print("Enter deposit amount: ");
+                        accounts[0].deposit(sc.nextLong());
+                        System.out.println("Deposit successful.");
+                        break;
 
-                case 4:
-                    System.out.print("Enter withdrawal amount: ");
-                    accounts[0].withdraw(sc.nextLong());
-                    break;
+                    case 4:
+                        System.out.print("Enter withdrawal amount: ");
+                        accounts[0].withdraw(sc.nextLong());
+                        System.out.println("Withdrawal successful.");
+                        break;
 
-                case 5:
-                    System.out.println("Thank you!");
-                    break;
+                    case 5:
+                        System.out.print("Enter transfer amount: ");
+                        long amount = sc.nextLong();
+                        accounts[0].transfer(accounts[1], amount);
+                        System.out.println("Transfer successful.");
+                        break;
 
-                default:
-                    System.out.println("Invalid choice.");
+                    case 6:
+                        System.out.println("Thank you!");
+                        break;
+
+                    default:
+                        System.out.println("Invalid choice.");
+                }
+            } catch (InsufficientFundsException e) {
+                System.out.println("Withdrawal failed: short by "
+                        + e.getShortfall());
+            } catch (InvalidAmountException e) {
+                System.out.println("Invalid amount: " + e.getMessage());
+            } catch (AccountNotFoundException e) {
+                System.out.println("Account not found: " + e.getMessage());
+            } catch (BankException e) {
+                System.out.println("Bank error: " + e.getMessage());
+            } finally {
+                if (choice >= 3 && choice <= 5) {
+                    System.out.println("Transaction operation finished.");
+                }
             }
-        } while (choice != 5);
+
+        } while (choice != 6);
+
+        try (BankResource resource = new BankResource()) {
+            System.out.println("Resource opened.");
+            throw new RuntimeException("Demo exception");
+        } catch (RuntimeException e) {
+            System.out.println("Caught: " + e.getMessage());
+        }
 
         sc.close();
     }

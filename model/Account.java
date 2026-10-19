@@ -1,6 +1,10 @@
 package model;
+import exception.InsufficientFundsException;
+import exception.InvalidAmountException;
 import model.annotation.Id;
 import model.annotation.Positive;
+import exception.BankException;
+import exception.AccountNotFoundException;
 
 public abstract class Account implements Transactable, InterestBearing {
     @Id
@@ -23,25 +27,29 @@ public abstract class Account implements Transactable, InterestBearing {
 
     
     @Override
-    public void deposit(long amount) {
-        if (amount > 0) {
-            balance += amount;
-            System.out.println("Deposit successful.");
-        } else {
-            System.out.println("Invalid deposit amount.");
-        }
+public void deposit(long amount) throws InvalidAmountException {
+    if (amount <= 0) {
+        throw new InvalidAmountException("Deposit amount must be positive.");
     }
 
-    @Override
-    public boolean withdraw(long amount) {
-        if (canWithdraw(amount)) {
-            balance -= amount;
-            System.out.println("Withdrawal successful.");
-            return true;
-        }
+    balance += amount;
+}
 
-    System.out.println("Withdrawal not allowed.");
-    return false;
+@Override
+public boolean withdraw(long amount)
+        throws InsufficientFundsException, InvalidAmountException {
+
+    if (amount <= 0) {
+        throw new InvalidAmountException("Withdrawal amount must be positive.");
+    }
+
+    if (balance < amount) {
+       throw new InsufficientFundsException(
+    "Insufficient funds.", (long) (amount - balance));
+    }
+
+    balance -= amount;
+    return true;
 }
 
     public abstract double interestRate();
@@ -53,4 +61,15 @@ public abstract class Account implements Transactable, InterestBearing {
         return "Account{accountNumber=" + accountNumber
                 + ", balance=" + balance + "}";
     }
+
+    public void transfer(Account to, long amount) throws BankException {
+    try {
+        withdraw(amount);
+        to.deposit(amount);
+    } catch (InsufficientFundsException | InvalidAmountException e) {
+        throw e;
+    } finally {
+        System.out.println("Transfer operation completed.");
+    }
+}
 }
