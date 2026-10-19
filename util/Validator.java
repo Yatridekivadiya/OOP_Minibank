@@ -1,4 +1,4 @@
-
+package util;
 public class Validator {
 
     public static boolean isValidName(String name) {

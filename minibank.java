@@ -1,7 +1,22 @@
 
 import java.util.Scanner;
 
-public class minibank {
+import model.Account;
+import model.CurrentAccount;
+import model.Customer;
+import model.FixedDepositAccount;
+import model.SavingsAccount;
+import model.WithdrawRule;
+import model.Premium;
+import model.BankInfo;
+import model.MenuOption;
+import util.Validator;
+import util.CommandParser;
+import util.Command;
+import util.TransactionType;
+
+
+public class MiniBank {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -12,6 +27,24 @@ public class minibank {
             new CurrentAccount(1002, 2000, 1000),
             new FixedDepositAccount(1003, 10000)
         };
+
+        
+        WithdrawRule rule1 = new WithdrawRule() {
+            @Override
+            public boolean allow(Account account, long amount) {
+                return account.canWithdraw(amount);
+            }
+        };
+
+        WithdrawRule rule2 = (account, amount) ->
+                account.canWithdraw(amount);
+
+        System.out.println("Anonymous class result: "
+                + rule1.allow(accounts[0], 500));
+
+        System.out.println("Lambda result: "
+                + rule2.allow(accounts[0], 500));
+
 
         int choice;
 
@@ -36,6 +69,8 @@ public class minibank {
                         System.out.println(account);
                         System.out.println("Interest Rate: "
                                 + account.interestRate() + "%");
+                        System.out.println("Yearly Interest: "
+                                + account.yearlyInterest());
 
                         if (account instanceof SavingsAccount) {
                             System.out.println("Type: Savings Account");
@@ -45,12 +80,12 @@ public class minibank {
 
                 case 3:
                     System.out.print("Enter deposit amount: ");
-                    accounts[0].deposit(sc.nextDouble());
+                    accounts[0].deposit(sc.nextLong());
                     break;
 
                 case 4:
                     System.out.print("Enter withdrawal amount: ");
-                    accounts[0].withdraw(sc.nextDouble());
+                    accounts[0].withdraw(sc.nextLong());
                     break;
 
                 case 5:

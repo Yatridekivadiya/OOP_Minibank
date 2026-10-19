@@ -1,3 +1,6 @@
+package util;
+import util.Command;
+import util.CommandParser;
 
 public class TestCommand {
     public static void main(String[] args) {

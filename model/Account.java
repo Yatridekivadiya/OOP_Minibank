@@ -1,5 +1,6 @@
+package model;
 
-public abstract class Account {
+public abstract class Account implements Transactable, InterestBearing {
     protected int accountNumber;
     protected double balance;
 
@@ -16,7 +17,9 @@ public abstract class Account {
         return balance;
     }
 
-    public void deposit(double amount) {
+    
+    @Override
+    public void deposit(long amount) {
         if (amount > 0) {
             balance += amount;
             System.out.println("Deposit successful.");
@@ -25,14 +28,17 @@ public abstract class Account {
         }
     }
 
-    public void withdraw(double amount) {
-        if (canWithdraw((long) amount)) {
+    @Override
+    public boolean withdraw(long amount) {
+        if (canWithdraw(amount)) {
             balance -= amount;
             System.out.println("Withdrawal successful.");
-        } else {
-            System.out.println("Withdrawal not allowed.");
+            return true;
         }
-    }
+
+    System.out.println("Withdrawal not allowed.");
+    return false;
+}
 
     public abstract double interestRate();
 

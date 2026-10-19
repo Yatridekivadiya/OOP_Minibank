@@ -1,4 +1,4 @@
-
+package util;
 public class Command {
     private TransactionType type;
     private double amount;
