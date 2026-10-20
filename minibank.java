@@ -1,5 +1,7 @@
-
 import java.util.Scanner;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
 
 import model.Account;
 import model.CurrentAccount;
@@ -13,6 +15,9 @@ import model.TransactionTask;
 import model.ProducerConsumer;
 
 import util.AnnotationValidator;
+import util.StatePersister;
+import util.TransactionLog;
+import util.ReportGenerator;
 
 import exception.BankException;
 import exception.InsufficientFundsException;
@@ -21,6 +26,7 @@ import exception.InvalidAmountException;
 import exception.BankResource;
 
 public class MiniBank {
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -31,6 +37,23 @@ public class MiniBank {
             new CurrentAccount(1002, 2000, 1000),
             new FixedDepositAccount(1003, 10000)
         };
+
+        Path accountsFile = Paths.get("accounts.dat");
+        Path logsFolder = Paths.get("logs");
+        Path transactionFile = logsFolder.resolve("transactions.txt");
+        Path reportFile = Paths.get("end-of-day-report.txt");
+
+        try {
+            if (java.nio.file.Files.exists(accountsFile)) {
+                accounts = StatePersister.load(accountsFile);
+                System.out.println("Accounts loaded successfully.");
+            } else {
+                StatePersister.save(accounts, accountsFile);
+                System.out.println("Accounts saved successfully.");
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Persistence error: " + e.getMessage());
+        }
 
         Account invalidAccount = new SavingsAccount(1004, -100, 0);
 
@@ -45,8 +68,7 @@ public class MiniBank {
             }
         };
 
-        WithdrawRule rule2 = (account, amount) ->
-                account.canWithdraw(amount);
+        WithdrawRule rule2 = (account, amount) -> account.canWithdraw(amount);
 
         System.out.println("Anonymous class result: "
                 + rule1.allow(accounts[0], 500));
@@ -66,6 +88,9 @@ public class MiniBank {
             System.out.println("6. Thread Test");
             System.out.println("7. Exit");
             System.out.println("8. Producer-Consumer Test");
+            System.out.println("9. Save Accounts");
+            System.out.println("10. Load Accounts");
+            System.out.println("11. Generate Report");
             System.out.print("Enter choice: ");
 
             choice = sc.nextInt();
@@ -73,7 +98,7 @@ public class MiniBank {
             try {
                 switch (choice) {
                     case 1:
-                        System.out.println(customer);
+                        customer.displayCustomer();
                         break;
 
                     case 2:
@@ -92,20 +117,37 @@ public class MiniBank {
 
                     case 3:
                         System.out.print("Enter deposit amount: ");
-                        accounts[0].deposit(sc.nextLong());
+                        long depositAmount = sc.nextLong();
+                        accounts[0].deposit(depositAmount);
+
+                        TransactionLog.append(transactionFile,
+                                "DEPOSIT " + depositAmount);
+
                         System.out.println("Deposit successful.");
                         break;
 
                     case 4:
                         System.out.print("Enter withdrawal amount: ");
-                        accounts[0].withdraw(sc.nextLong());
+                        long withdrawalAmount = sc.nextLong();
+                        accounts[0].withdraw(withdrawalAmount);
+
+                        TransactionLog.append(transactionFile,
+                                "WITHDRAWAL " + withdrawalAmount);
+
                         System.out.println("Withdrawal successful.");
                         break;
 
                     case 5:
                         System.out.print("Enter transfer amount: ");
-                        long amount = sc.nextLong();
-                        accounts[0].transfer(accounts[1], amount);
+                        long transferAmount = sc.nextLong();
+
+                        accounts[0].transfer(accounts[1], transferAmount);
+
+                        TransactionLog.append(transactionFile,
+                                "WITHDRAWAL " + transferAmount);
+                        TransactionLog.append(transactionFile,
+                                "DEPOSIT " + transferAmount);
+
                         System.out.println("Transfer successful.");
                         break;
 
@@ -116,14 +158,13 @@ public class MiniBank {
                         for (int i = 0; i < 10; i++) {
                             threads[i] = new Thread(
                                     new AccountWorker(testAccount, 1000, 1),
-                                    "Worker-" + (i + 1)
-                            );
+                                    "Worker-" + (i + 1));
                             threads[i].start();
                         }
 
-                        for (int i = 0; i < 10; i++) {
+                        for (Thread thread : threads) {
                             try {
-                                threads[i].join();
+                                thread.join();
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                                 System.out.println("Thread interrupted.");
@@ -166,18 +207,45 @@ public class MiniBank {
                         }
                         break;
 
+                    case 9:
+                        StatePersister.save(accounts, accountsFile);
+                        System.out.println("Accounts saved successfully.");
+                        break;
+
+                    case 10:
+                        accounts = StatePersister.load(accountsFile);
+                        System.out.println("Accounts loaded successfully.");
+                        for (Account account : accounts) {
+                            System.out.println(account);
+                        }
+                        break;
+
+                    case 11:
+                        ReportGenerator.generate(logsFolder, reportFile);
+                        break;
+
                     default:
-                        System.out.println("Invalid choice.");
+                        if (choice != 7) {
+                            System.out.println("Invalid choice.");
+                        }
                 }
+
             } catch (InsufficientFundsException e) {
                 System.out.println("Withdrawal failed: short by "
                         + e.getShortfall());
+
             } catch (InvalidAmountException e) {
                 System.out.println("Invalid amount: " + e.getMessage());
+
             } catch (AccountNotFoundException e) {
                 System.out.println("Account not found: " + e.getMessage());
+
             } catch (BankException e) {
                 System.out.println("Bank error: " + e.getMessage());
+
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("File operation failed: " + e.getMessage());
+
             } finally {
                 if (choice >= 3 && choice <= 5) {
                     System.out.println("Transaction operation finished.");
@@ -185,6 +253,16 @@ public class MiniBank {
             }
 
         } while (choice != 7);
+
+        try {
+            StatePersister.save(accounts, accountsFile);
+            System.out.println("Final account state saved.");
+
+            ReportGenerator.generate(logsFolder, reportFile);
+
+        } catch (IOException e) {
+            System.out.println("Could not save final data: " + e.getMessage());
+        }
 
         TransactionProcessor processor = new TransactionProcessor();
 

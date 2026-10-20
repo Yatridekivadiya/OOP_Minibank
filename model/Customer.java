@@ -1,9 +1,17 @@
 package model;
+
+import java.io.Serializable;
 import model.annotation.MaxLength;
 
-public class Customer {
+public class Customer implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private int customerId;
+
+    @MaxLength(10)
     private String name;
+
     private String email;
     private Address address;
 
@@ -41,7 +49,10 @@ public class Customer {
         System.out.println("Address: " + address);
     }
 
-    public class Address {
+    public class Address implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
         private String street;
         private String city;
         private String pinCode;

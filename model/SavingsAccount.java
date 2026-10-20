@@ -1,6 +1,11 @@
 package model;
 
-public class SavingsAccount extends Account {
+import java.io.Serializable;
+
+public class SavingsAccount extends Account implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private long minBalance;
 
     public SavingsAccount(int accountNumber, double balance, long minBalance) {
