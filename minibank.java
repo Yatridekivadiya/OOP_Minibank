@@ -7,15 +7,12 @@ import model.Customer;
 import model.FixedDepositAccount;
 import model.SavingsAccount;
 import model.WithdrawRule;
-import model.Premium;
-import model.BankInfo;
-import model.MenuOption;
 import model.AccountWorker;
-import util.Validator;
-import util.CommandParser;
-import util.Command;
-import util.TransactionType;
+import model.TransactionProcessor;
+import model.TransactionTask;
+
 import util.AnnotationValidator;
+
 import exception.BankException;
 import exception.InsufficientFundsException;
 import exception.AccountNotFoundException;
@@ -160,6 +157,15 @@ public class MiniBank {
             }
 
         } while (choice != 7);
+
+        TransactionProcessor processor = new TransactionProcessor();
+
+        for (int i = 1; i <= 10; i++) {
+            processor.submit(new TransactionTask(i));
+        }
+
+        processor.stop();
+        System.out.println("All tasks completed.");
 
         try (BankResource resource = new BankResource()) {
             System.out.println("Resource opened.");
