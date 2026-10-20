@@ -10,6 +10,7 @@ import model.WithdrawRule;
 import model.AccountWorker;
 import model.TransactionProcessor;
 import model.TransactionTask;
+import model.ProducerConsumer;
 
 import util.AnnotationValidator;
 
@@ -64,6 +65,7 @@ public class MiniBank {
             System.out.println("5. Transfer");
             System.out.println("6. Thread Test");
             System.out.println("7. Exit");
+            System.out.println("8. Producer-Consumer Test");
             System.out.print("Enter choice: ");
 
             choice = sc.nextInt();
@@ -109,7 +111,6 @@ public class MiniBank {
 
                     case 6:
                         Account testAccount = new SavingsAccount(1005, 0, 0);
-
                         Thread[] threads = new Thread[10];
 
                         for (int i = 0; i < 10; i++) {
@@ -136,6 +137,33 @@ public class MiniBank {
 
                     case 7:
                         System.out.println("Thank you!");
+                        break;
+
+                    case 8:
+                        ProducerConsumer pc = new ProducerConsumer();
+
+                        Thread producer = new Thread(() -> {
+                            for (int i = 1; i <= 10; i++) {
+                                pc.produce(i);
+                            }
+                        }, "Producer");
+
+                        Thread consumer = new Thread(() -> {
+                            for (int i = 1; i <= 10; i++) {
+                                pc.consume();
+                            }
+                        }, "Consumer");
+
+                        producer.start();
+                        consumer.start();
+
+                        try {
+                            producer.join();
+                            consumer.join();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            System.out.println("Thread interrupted.");
+                        }
                         break;
 
                     default:
