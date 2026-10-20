@@ -10,6 +10,7 @@ import model.WithdrawRule;
 import model.Premium;
 import model.BankInfo;
 import model.MenuOption;
+import model.AccountWorker;
 import util.Validator;
 import util.CommandParser;
 import util.Command;
@@ -64,7 +65,8 @@ public class MiniBank {
             System.out.println("3. Deposit");
             System.out.println("4. Withdraw");
             System.out.println("5. Transfer");
-            System.out.println("6. Exit");
+            System.out.println("6. Thread Test");
+            System.out.println("7. Exit");
             System.out.print("Enter choice: ");
 
             choice = sc.nextInt();
@@ -109,6 +111,33 @@ public class MiniBank {
                         break;
 
                     case 6:
+                        Account testAccount = new SavingsAccount(1005, 0, 0);
+
+                        Thread[] threads = new Thread[10];
+
+                        for (int i = 0; i < 10; i++) {
+                            threads[i] = new Thread(
+                                    new AccountWorker(testAccount, 1000, 1),
+                                    "Worker-" + (i + 1)
+                            );
+                            threads[i].start();
+                        }
+
+                        for (int i = 0; i < 10; i++) {
+                            try {
+                                threads[i].join();
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                System.out.println("Thread interrupted.");
+                                break;
+                            }
+                        }
+
+                        System.out.println("Final balance: "
+                                + testAccount.getBalance());
+                        break;
+
+                    case 7:
                         System.out.println("Thank you!");
                         break;
 
@@ -130,7 +159,7 @@ public class MiniBank {
                 }
             }
 
-        } while (choice != 6);
+        } while (choice != 7);
 
         try (BankResource resource = new BankResource()) {
             System.out.println("Resource opened.");
