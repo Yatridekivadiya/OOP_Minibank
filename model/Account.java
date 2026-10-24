@@ -1,3 +1,4 @@
+
 package model;
 
 import java.io.Serializable;
@@ -7,7 +8,7 @@ import exception.BankException;
 import model.annotation.Id;
 import model.annotation.Positive;
 
-public abstract class Account implements Transactable, InterestBearing, Serializable {
+public abstract class Account implements Transactable, InterestBearing, Serializable, Comparable<Account> {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,6 +29,11 @@ public abstract class Account implements Transactable, InterestBearing, Serializ
 
     public double getBalance() {
         return balance;
+    }
+
+    @Override
+    public int compareTo(Account other) {
+        return Integer.compare(this.accountNumber, other.accountNumber);
     }
 
     @Override
